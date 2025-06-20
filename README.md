@@ -61,7 +61,8 @@ $ python src/main.py
 
 ## Directory Structure
 
-arp_dns_spoofing_tool/
+```bash
+spoofer/
 ├── README.md             # This file
 ├── requirements.txt      # Python dependencies
 ├── docs/                 # Design documentation, UML diagrams
@@ -85,6 +86,7 @@ arp_dns_spoofing_tool/
         └── builders/          # Builder classes for strategies
             ├── __init__.py
             └── arp_spoof_builder.py
+```
 
 
 
