@@ -4,6 +4,9 @@ A Python-based desktop application for performing ARP spoofing and DNS spoofing 
 
 ---
 
+> [!WARNING]
+> *This tool is under development. Keep your expectations low*.
+
 ## Features
 
 - **Network Scanning**: Discover live hosts on the local `/24` network via ARP.  
