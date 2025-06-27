@@ -1,0 +1,14 @@
+# Ignore dotfiles
+.*
+
+# Include gitignore
+!.gitignore
+
+# Ignore python cache files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.egg-info/
+*.egg 
