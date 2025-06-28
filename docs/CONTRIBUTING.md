@@ -75,8 +75,8 @@ If you need any assistance during the translation process, feel free to open an 
 - **Format**: Use the present tense ("Add feature" not "Added feature").
 - **Description**: Provide a brief description of the changes made.
 - **Style guide**: Follow this style guide for commit messages:
-<div align="center">
-<img src="imgs/commit.png" alt="standard-commits" width="400">
+<div>
+<img src="imgs/commit.png" alt="standard-commits" width="500">
 </div>
 
 ## Additional Resources
