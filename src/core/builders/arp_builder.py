@@ -8,8 +8,8 @@ This module provides a builder class for constructing ARP packets.
 It allows for easy creation of ARP requests and replies with specified parameters.
 """
 
-from src.core.logger import Logger
-from src.core.strategies.arp_spoof import ArpSpoofingStrategy
+from ..logger import Logger
+from ..strategies.arp_spoof import ArpSpoofingStrategy
 
 class ArpBuilder:
     def __init__(self, logger: Logger):
